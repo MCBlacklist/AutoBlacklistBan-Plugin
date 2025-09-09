@@ -1,0 +1,4 @@
+name: AutoBlacklistBan
+version: '1.0.0'
+main: com.mcblacklist.autoBlacklistBan.AutoBlacklistBan
+api-version: '1.21'
