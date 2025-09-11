@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -52,7 +53,9 @@ public class BlacklistListener extends BukkitRunnable {
                 JsonArray arr = gson.fromJson(reader, JsonArray.class);
                 for (JsonElement el : arr) {
                     JsonObject obj = el.getAsJsonObject();
-                    String offenderId = obj.get("offender_discord_id").getAsString();
+                    JsonElement discordEl = obj.get("offender_discord_id");
+                    String offenderId = (discordEl == null || discordEl.isJsonNull()) ? "N/A" : discordEl.getAsString();
+
                     String banDate = obj.get("ban_date").getAsString();
                     String key = offenderId + "_" + banDate;
 
@@ -61,12 +64,46 @@ public class BlacklistListener extends BukkitRunnable {
 
                         String username = obj.get("offender_username").getAsString();
                         String offense = obj.get("offense_type").getAsString();
-                        String duration = obj.get("ban_duration").getAsString();
+                        JsonElement durationEl = obj.get("ban_duration");
+                        String duration = (durationEl == null || durationEl.isJsonNull())
+                                ? "Permanent"
+                                : String.valueOf(durationEl.getAsInt());
+
 
                         Bukkit.getLogger().info(ChatColor.BOLD + "" + ChatColor.BLUE + "[Blacklist] New entry: " + ChatColor.RESET + "" + ChatColor.RED + username + " (" + offense + ", " + duration + ")");
                         BanList banList = Bukkit.getBanList(BanList.Type.NAME);
-                        banList.addBan(username, "Banned for: " + offense + " | Duration: " + duration, (Date) null, "© Blacklist");
+                        Date expires = null;
+                        String durationStr;
 
+                        if (duration.equals("Permanent") || duration.equals("100000")) {
+                            durationStr = "Permanent";
+                        } else {
+                            int days = Integer.parseInt(duration);
+                            durationStr = days + " day(s)";
+
+                            Calendar cal = Calendar.getInstance();
+                            cal.add(Calendar.DAY_OF_MONTH, days);
+                            expires = cal.getTime();
+                        }
+
+                        String expiresFormatted = expires != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(expires) : "Never";
+
+                        String banMessage = ChatColor.RED + "==============================\n" +
+                                ChatColor.BOLD + "" + ChatColor.RED + "⚠ YOU HAVE BEEN BLACKLISTED! ⚠\n" +
+                                ChatColor.RED + "==============================\n\n" +
+                                ChatColor.GOLD + "Offense: " + ChatColor.YELLOW + offense + "\n" +
+                                ChatColor.GOLD + "Duration: " + ChatColor.YELLOW + durationStr + "\n" +
+                                ChatColor.GOLD + "Expires on: " + ChatColor.YELLOW + expiresFormatted + "\n\n" +
+                                ChatColor.GRAY + "Issued by: © Blacklist System\n" +
+                                ChatColor.RED + "==============================";
+
+                        banList.addBan(username, banMessage, expires, "© Blacklist");
+
+                        Player player = Bukkit.getPlayerExact(username);
+                        if (player != null && player.isOnline()) {
+                            final String kickMsg = banMessage;
+                            Bukkit.getScheduler().runTask(plugin, () -> player.kickPlayer(kickMsg));
+                        }
 
                     }
                 }
