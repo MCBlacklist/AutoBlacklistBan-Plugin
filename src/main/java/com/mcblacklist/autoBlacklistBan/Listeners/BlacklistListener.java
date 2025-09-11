@@ -1,4 +1,4 @@
-package com.mcblacklist.autoBlacklistBan;
+package com.mcblacklist.autoBlacklistBan.Listeners;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -8,26 +8,29 @@ import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class BlacklistListener extends BukkitRunnable {
     private final JavaPlugin plugin;
     private final String apiUrl;
     private final Set<String> knownEntries = new HashSet<>();
     private final Gson gson = new Gson();
+    public static String banMessagefinal;
+
+    public static final Set<UUID> blacklistedPlayers = new HashSet<>();
+
+    public void addBlacklist(UUID uuid) {
+        blacklistedPlayers.add(uuid);
+    }
+
 
     public BlacklistListener(JavaPlugin plugin, String apiUrl) {
         this.plugin = plugin;
@@ -75,7 +78,8 @@ public class BlacklistListener extends BukkitRunnable {
                         Date expires = null;
                         String durationStr;
 
-                        if (duration.equals("Permanent") || duration.equals("100000")) {
+                        // calculation for the unban day
+                        if (duration.equals("Permanent")) {
                             durationStr = "Permanent";
                         } else {
                             int days = Integer.parseInt(duration);
@@ -97,11 +101,12 @@ public class BlacklistListener extends BukkitRunnable {
                                 ChatColor.GRAY + "Issued by: © Blacklist System\n" +
                                 ChatColor.RED + "==============================";
 
-                        banList.addBan(username, banMessage, expires, "© Blacklist");
+                        banMessagefinal=banMessage;
 
                         Player player = Bukkit.getPlayerExact(username);
+                        addBlacklist(player.getUniqueId());
                         if (player != null && player.isOnline()) {
-                            final String kickMsg = banMessage;
+                            final String kickMsg = banMessagefinal;
                             Bukkit.getScheduler().runTask(plugin, () -> player.kickPlayer(kickMsg));
                         }
 

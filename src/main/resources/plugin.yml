@@ -6,3 +6,6 @@ commands:
     blacklistnotify:
         description: Main command for AutoBlacklistBan plugin
         usage: /blacklistnotify <remove|grant> <player>
+    exemptblacklist:
+        description: Exempt a player from being blacklisted
+        usage: /exemptblacklist <player>
