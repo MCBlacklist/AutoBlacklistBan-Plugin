@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mcblacklist.autoBlacklistBan.Managers.BlacklistManager;
+import com.mcblacklist.autoBlacklistBan.UUIDFetcher;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,11 +33,14 @@ public class BlacklistListener extends BukkitRunnable {
         blacklistedPlayers.add(uuid);
     }
 
+    BlacklistManager blacklistManager;
 
-    public BlacklistListener(JavaPlugin plugin, String apiUrl) {
+    public BlacklistListener(JavaPlugin plugin, String apiUrl, BlacklistManager blacklistManager) {
         this.plugin = plugin;
         this.apiUrl = apiUrl;
+        this.blacklistManager = blacklistManager;
     }
+
 
     @Override
     public void run() {
@@ -104,12 +109,25 @@ public class BlacklistListener extends BukkitRunnable {
                         banMessagefinal=banMessage;
 
                         Player player = Bukkit.getPlayerExact(username);
-                        addBlacklist(player.getUniqueId());
+
+                        UUID uuid;
+                        if (player != null) {
+                            uuid = player.getUniqueId();
+                        } else {
+                            try {
+                                uuid = UUIDFetcher.getUUID(username); // this'll change once I get the uuid in the api instead of the username
+                            } catch (Exception ex) {
+                                Bukkit.getLogger().warning("Failed to resolve UUID for " + username + ": " + ex.getMessage());
+                                continue;
+                            }
+                        }
+
+                        blacklistManager.add(uuid, offense, durationStr, expiresFormatted);
+
                         if (player != null && player.isOnline()) {
                             final String kickMsg = banMessagefinal;
                             Bukkit.getScheduler().runTask(plugin, () -> player.kickPlayer(kickMsg));
                         }
-
                     }
                 }
             }

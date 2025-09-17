@@ -1,51 +1,51 @@
 package com.mcblacklist.autoBlacklistBan.cmds;
 
+import com.mcblacklist.autoBlacklistBan.Managers.ExemptManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class exemptblacklist implements CommandExecutor {
-    public static List<UUID> exemptedPlayers = new ArrayList<>();
+public class exemptblacklist implements CommandExecutor, TabCompleter {
+    private final ExemptManager exemptManager;
+
+    public exemptblacklist(ExemptManager exemptManager) {
+        this.exemptManager = exemptManager;
+    }
+
     @Override
-    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        if (!commandSender.isOp()) return true;
-        if (command.getName().equalsIgnoreCase("exemptblacklist")) {
-            if (strings.length != 1) {
-                commandSender.sendMessage("Usage: /exemptblacklist <player>");
-                return true;
-            }
-            if (strings[0].length() > 16) {
-                commandSender.sendMessage("Player names cannot be longer than 16 characters.");
-                return true;
-            }
-            if (strings[0].length() < 3) {
-                commandSender.sendMessage("Player names cannot be shorter than 3 characters.");
-                return true;
-            }
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length != 2) return false;
 
-            String playerName = strings[0];
-            Player player = Bukkit.getPlayerExact(playerName);
-
-            if (player == null) {
-                commandSender.sendMessage("Player " + playerName + " not found.");
-                return true;
-            }
-
-            if (exemptedPlayers.contains(player.getUniqueId())) {
-                commandSender.sendMessage("Player " + playerName + " is already exempted from the blacklist.");
-                return true;
-            }
-
-            exemptedPlayers.add(player.getUniqueId());
+        if (args[0].equalsIgnoreCase("add")) {
+            UUID uuid = Bukkit.getOfflinePlayer(args[1]).getUniqueId();
+            exemptManager.addExempt(uuid);
+            sender.sendMessage("§aAdded " + args[1] + " to exemptions.");
             return true;
         }
+
+        if (args[0].equalsIgnoreCase("remove")) {
+            UUID uuid = Bukkit.getOfflinePlayer(args[1]).getUniqueId();
+            exemptManager.removeExempt(uuid);
+            sender.sendMessage("§cRemoved " + args[1] + " from exemptions.");
+            return true;
+        }
+
         return false;
     }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
+        if (strings.length == 1) {
+            return List.of("add", "remove");
+        }
+        return null;
+    }
 }
+
