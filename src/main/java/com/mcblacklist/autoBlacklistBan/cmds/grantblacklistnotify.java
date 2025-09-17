@@ -1,5 +1,6 @@
 package com.mcblacklist.autoBlacklistBan.cmds;
 
+import com.mcblacklist.autoBlacklistBan.Managers.ExemptManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class grantblacklistnotify implements CommandExecutor {
+    ExemptManager exemptManager;
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
         if (command.getName().equalsIgnoreCase("blacklistnotify")) {
@@ -20,8 +22,8 @@ public class grantblacklistnotify implements CommandExecutor {
                 commandSender.getServer().dispatchCommand(commandSender.getServer().getConsoleSender(), "lp user " + playerName + " permission set blacklist.notify true");
                 Player player = commandSender.getServer().getPlayer(playerName);
                 if (strings[1].equalsIgnoreCase("remove")) {
-                    if (player.hasPermission("blacklist.notify")) {
-                        commandSender.getServer().dispatchCommand(commandSender.getServer().getConsoleSender(), "lp user " + playerName + " permission unset blacklist.notify");
+                    if (exemptManager.isExempt(player.getUniqueId())) {
+                        exemptManager.removeExempt(player.getUniqueId());
                         commandSender.sendMessage(ChatColor.BLUE + "" + ChatColor.BOLD + "[Blacklist] " + ChatColor.RESET + ChatColor.GREEN + "Role successfully granted!" );
                     } else {
                         commandSender.sendMessage(ChatColor.BLUE + "" + ChatColor.BOLD + "[Blacklist] " + ChatColor.RESET + ChatColor.RED +   playerName + " does not have the blacklist notify permission.");
@@ -30,6 +32,7 @@ public class grantblacklistnotify implements CommandExecutor {
                     commandSender.sendMessage("Removed blacklist notify permission from " + playerName);
                     return true;
                 } else if (!strings[1].equalsIgnoreCase("grant")) {
+                    exemptManager.addExempt(player.getUniqueId());
                     commandSender.sendMessage("Usage: /blacklistnotify <grant|remove> <player>");
                     return true;
                 }
