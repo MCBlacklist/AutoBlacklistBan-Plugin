@@ -70,7 +70,7 @@ public class BlacklistListener extends BukkitRunnable {
                     if (!knownEntries.contains(key)) {
                         knownEntries.add(key);
 
-                        String username = obj.get("offender_username").getAsString();
+                        UUID username = obj.get("offender_uuid").isJsonNull() ? null : UUID.fromString(obj.get("offender_uuid").getAsString());
                         String offense = obj.get("offense_type").getAsString();
                         JsonElement durationEl = obj.get("ban_duration");
                         String duration = (durationEl == null || durationEl.isJsonNull())
@@ -108,21 +108,9 @@ public class BlacklistListener extends BukkitRunnable {
 
                         banMessagefinal=banMessage;
 
-                        Player player = Bukkit.getPlayerExact(username);
+                        Player player = Bukkit.getPlayerExact(UUIDFetcher.getUsername(username));
 
-                        UUID uuid;
-                        if (player != null) {
-                            uuid = player.getUniqueId();
-                        } else {
-                            try {
-                                uuid = UUIDFetcher.getUUID(username); // this'll change once I get the uuid in the api instead of the username
-                            } catch (Exception ex) {
-                                Bukkit.getLogger().warning("Failed to resolve UUID for " + username + ": " + ex.getMessage());
-                                continue;
-                            }
-                        }
-
-                        blacklistManager.add(uuid, offense, durationStr, expiresFormatted);
+                        blacklistManager.add(username, offense, durationStr, expiresFormatted);
 
                         if (player != null && player.isOnline()) {
                             final String kickMsg = banMessagefinal;
