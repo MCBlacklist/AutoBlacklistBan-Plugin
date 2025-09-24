@@ -8,4 +8,4 @@ commands:
         usage: /blacklistnotify <remove|grant> <player>
     exemptblacklist:
         description: Exempt a player from being blacklisted
-        usage: /exemptblacklist <player>
+        usage: /exemptblacklist <add|remove> <player>
