@@ -20,7 +20,7 @@ public class exemptblacklist implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (args.length != 2) return false;
 
         if (args[0].equalsIgnoreCase("add")) {

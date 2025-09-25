@@ -8,6 +8,8 @@ import com.mcblacklist.autoBlacklistBan.cmds.grantblacklistnotify;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
+
 public final class AutoBlacklistBan extends JavaPlugin {
 
     @Override
@@ -22,15 +24,15 @@ public final class AutoBlacklistBan extends JavaPlugin {
         new BlacklistListener(this, apiUrl, blacklistManager).start(20L * 60);
 
         //cmds
-        this.getCommand("blacklistnotify").setExecutor(new grantblacklistnotify());
-        this.getCommand("exemptblacklist").setExecutor(new com.mcblacklist.autoBlacklistBan.cmds.exemptblacklist(exemptManager));
+        Objects.requireNonNull(this.getCommand("blacklistnotify")).setExecutor(new grantblacklistnotify());
+        Objects.requireNonNull(this.getCommand("exemptblacklist")).setExecutor(new com.mcblacklist.autoBlacklistBan.cmds.exemptblacklist(exemptManager));
 
 
         //listeners
         Bukkit.getPluginManager().registerEvents(new LoginListener(exemptManager, blacklistManager), this);
 
         //tabcompleteres
-        this.getCommand("exemptblacklist").setTabCompleter(new com.mcblacklist.autoBlacklistBan.cmds.exemptblacklist(exemptManager));
+        Objects.requireNonNull(this.getCommand("exemptblacklist")).setTabCompleter(new com.mcblacklist.autoBlacklistBan.cmds.exemptblacklist(exemptManager));
 
         Bukkit.getLogger().info("BLACKLIST SYSTEM INITIALIZED - STARTED LISTENING");
     }
