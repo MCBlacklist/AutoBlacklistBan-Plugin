@@ -78,7 +78,7 @@ public class BlacklistListener extends BukkitRunnable {
                                 : String.valueOf(durationEl.getAsInt());
 
 
-                        Bukkit.getLogger().info(ChatColor.BOLD + "" + ChatColor.BLUE + "[Blacklist] New entry: " + ChatColor.RESET + "" + ChatColor.RED + username + " (" + offense + ", " + duration + ")");
+                        Bukkit.getLogger().info(ChatColor.BOLD + "" + ChatColor.BLUE + "New entry: " + ChatColor.RESET + "" + ChatColor.RED + username + " (" + offense + ", " + duration + ")");
                         BanList banList = Bukkit.getBanList(BanList.Type.NAME);
                         Date expires = null;
                         String durationStr;

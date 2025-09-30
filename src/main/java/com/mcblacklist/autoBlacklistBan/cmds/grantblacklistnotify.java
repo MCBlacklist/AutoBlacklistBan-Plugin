@@ -1,48 +1,103 @@
 package com.mcblacklist.autoBlacklistBan.cmds;
 
-import com.mcblacklist.autoBlacklistBan.Managers.ExemptManager;
-import org.bukkit.ChatColor;
+import com.mcblacklist.autoBlacklistBan.Managers.NotifyManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
+@SuppressWarnings({"SpellCheckingInspection", "ClassCanBeRecord"})
 public class grantblacklistnotify implements CommandExecutor {
-    ExemptManager exemptManager;
-    @Override
-    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        if (command.getName().equalsIgnoreCase("blacklistnotify")) {
-            if (commandSender.isOp()) {
-                if (strings.length != 1) {
-                    commandSender.sendMessage("Usage: /blacklistnotify <grant|remove> <player>");
-                    return true;
-                }
-                String playerName = strings[0];
-                commandSender.getServer().dispatchCommand(commandSender.getServer().getConsoleSender(), "lp user " + playerName + " permission set blacklist.notify true");
-                Player player = commandSender.getServer().getPlayer(playerName);
-                if (strings[1].equalsIgnoreCase("remove")) {
-                    if (exemptManager.isExempt(player.getUniqueId())) {
-                        exemptManager.removeExempt(player.getUniqueId());
-                        commandSender.sendMessage(ChatColor.BLUE + "" + ChatColor.BOLD + "[Blacklist] " + ChatColor.RESET + ChatColor.GREEN + "Role successfully granted!" );
-                    } else {
-                        commandSender.sendMessage(ChatColor.BLUE + "" + ChatColor.BOLD + "[Blacklist] " + ChatColor.RESET + ChatColor.RED +   playerName + " does not have the blacklist notify permission.");
-                        return true;
-                    }
-                    commandSender.sendMessage("Removed blacklist notify permission from " + playerName);
-                    return true;
-                } else if (!strings[1].equalsIgnoreCase("grant")) {
-                    exemptManager.addExempt(player.getUniqueId());
-                    commandSender.sendMessage("Usage: /blacklistnotify <grant|remove> <player>");
-                    return true;
-                }
-                commandSender.sendMessage("Granted blacklist notify permission to " + playerName);
-                return true;
-            } else {
-                commandSender.sendMessage("You do not have permission to use this command.");
-                return true;
-            }
+    private final NotifyManager notifyManager;
+
+    public grantblacklistnotify(NotifyManager notifyManager) {
+        this.notifyManager = notifyManager;
+    }
+
+    private UUID resolveUuid(String playerName) {
+        // Look for online player first
+        var player = Bukkit.getPlayerExact(playerName);
+        if (player != null) {
+            return player.getUniqueId();
         }
-        return false;
+        // Fallback to offline player
+        OfflinePlayer offline = Bukkit.getOfflinePlayer(playerName);
+        return offline.getUniqueId();
+    }
+
+    private void sendUsage(CommandSender sender) {
+        sender.sendMessage(Component.text("Usage: /blacklistnotify <player> OR /blacklistnotify <grant|remove> <player>", NamedTextColor.YELLOW));
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (!command.getName().equalsIgnoreCase("blacklistnotify")) {
+            return false;
+        }
+
+        if (!sender.isOp()) {
+            sender.sendMessage(Component.text("You do not have permission to use this command.", NamedTextColor.RED));
+            return true;
+        }
+
+        if (args.length == 1) {
+            String playerName = args[0];
+            UUID uuid = resolveUuid(playerName);
+            boolean had = notifyManager.contains(uuid);
+            if (had) {
+                notifyManager.remove(uuid);
+                sender.sendMessage(Component.text("Removed blacklist notify from ", NamedTextColor.GREEN)
+                        .append(Component.text(playerName, NamedTextColor.AQUA))
+                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY)));
+            } else {
+                notifyManager.add(uuid);
+                sender.sendMessage(Component.text("Granted blacklist notify to ", NamedTextColor.GREEN)
+                        .append(Component.text(playerName, NamedTextColor.AQUA))
+                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY)));
+            }
+            return true;
+        }
+
+        if (args.length != 2) {
+            sendUsage(sender);
+            return true;
+        }
+
+        String action = args[0];
+        String playerName = args[1];
+        UUID uuid = resolveUuid(playerName);
+
+        if (action.equalsIgnoreCase("grant")) {
+            boolean added = notifyManager.add(uuid);
+            if (added) {
+                sender.sendMessage(Component.text("Granted blacklist notify to ", NamedTextColor.GREEN)
+                        .append(Component.text(playerName, NamedTextColor.AQUA))
+                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY)));
+            } else {
+                sender.sendMessage(Component.text(playerName, NamedTextColor.YELLOW)
+                        .append(Component.text(" already has blacklist notify.", NamedTextColor.GRAY)));
+            }
+            return true;
+        } else if (action.equalsIgnoreCase("remove")) {
+            boolean removed = notifyManager.remove(uuid);
+            if (removed) {
+                sender.sendMessage(Component.text("Removed blacklist notify from ", NamedTextColor.GREEN)
+                        .append(Component.text(playerName, NamedTextColor.AQUA))
+                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY)));
+            } else {
+                sender.sendMessage(Component.text(playerName, NamedTextColor.RED)
+                        .append(Component.text(" did not have blacklist notify.", NamedTextColor.GRAY)));
+            }
+            return true;
+        } else {
+            sendUsage(sender);
+            return true;
+        }
     }
 }
