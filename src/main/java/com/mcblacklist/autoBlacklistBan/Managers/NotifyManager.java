@@ -25,7 +25,6 @@ public class NotifyManager {
     public NotifyManager(@NotNull JavaPlugin plugin) {
         this.plugin = plugin;
 
-        // Check if the data folder exists
         File dataFolder = plugin.getDataFolder();
         if (!dataFolder.exists() && !dataFolder.mkdirs()) {
             plugin.getLogger().severe("Failed to create plugin data folder: " + dataFolder.getAbsolutePath());

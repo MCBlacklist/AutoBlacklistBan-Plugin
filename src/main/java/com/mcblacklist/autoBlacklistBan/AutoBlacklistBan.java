@@ -23,7 +23,7 @@ public final class AutoBlacklistBan extends JavaPlugin {
         NotifyManager notifyManager = new NotifyManager(this);
 
         String apiUrl = "http://51.195.102.58/api/recent-blacklists";
-        new BlacklistListener(this, apiUrl, blacklistManager).start(20L * 60);
+        new BlacklistListener(this, apiUrl, blacklistManager, notifyManager).start(20L * 60);
 
         //cmds
         Objects.requireNonNull(this.getCommand("blacklistnotify")).setExecutor(new grantblacklistnotify(notifyManager));

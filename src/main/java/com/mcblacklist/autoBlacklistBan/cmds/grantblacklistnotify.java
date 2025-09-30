@@ -3,6 +3,7 @@ package com.mcblacklist.autoBlacklistBan.cmds;
 import com.mcblacklist.autoBlacklistBan.Managers.NotifyManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -15,24 +16,23 @@ import java.util.UUID;
 @SuppressWarnings({"SpellCheckingInspection", "ClassCanBeRecord"})
 public class grantblacklistnotify implements CommandExecutor {
     private final NotifyManager notifyManager;
+    private static final Component PREFIX = Component.text("[Blacklist] ", NamedTextColor.BLUE).decorate(TextDecoration.BOLD);
 
     public grantblacklistnotify(NotifyManager notifyManager) {
         this.notifyManager = notifyManager;
     }
 
     private UUID resolveUuid(String playerName) {
-        // Look for online player first
         var player = Bukkit.getPlayerExact(playerName);
         if (player != null) {
             return player.getUniqueId();
         }
-        // Fallback to offline player
         OfflinePlayer offline = Bukkit.getOfflinePlayer(playerName);
         return offline.getUniqueId();
     }
 
     private void sendUsage(CommandSender sender) {
-        sender.sendMessage(Component.text("Usage: /blacklistnotify <player> OR /blacklistnotify <grant|remove> <player>", NamedTextColor.YELLOW));
+        sender.sendMessage(PREFIX.append(Component.text("Usage: /blacklistnotify <player> OR /blacklistnotify <grant|remove> <player>", NamedTextColor.YELLOW)));
     }
 
     @Override
@@ -42,7 +42,7 @@ public class grantblacklistnotify implements CommandExecutor {
         }
 
         if (!sender.isOp()) {
-            sender.sendMessage(Component.text("You do not have permission to use this command.", NamedTextColor.RED));
+            sender.sendMessage(PREFIX.append(Component.text("You do not have permission to use this command.", NamedTextColor.RED)));
             return true;
         }
 
@@ -52,14 +52,14 @@ public class grantblacklistnotify implements CommandExecutor {
             boolean had = notifyManager.contains(uuid);
             if (had) {
                 notifyManager.remove(uuid);
-                sender.sendMessage(Component.text("Removed blacklist notify from ", NamedTextColor.GREEN)
+                sender.sendMessage(PREFIX.append(Component.text("Removed blacklist notify from ", NamedTextColor.GREEN)
                         .append(Component.text(playerName, NamedTextColor.AQUA))
-                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY)));
+                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY))));
             } else {
                 notifyManager.add(uuid);
-                sender.sendMessage(Component.text("Granted blacklist notify to ", NamedTextColor.GREEN)
+                sender.sendMessage(PREFIX.append(Component.text("Granted blacklist notify to ", NamedTextColor.GREEN)
                         .append(Component.text(playerName, NamedTextColor.AQUA))
-                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY)));
+                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY))));
             }
             return true;
         }
@@ -76,23 +76,23 @@ public class grantblacklistnotify implements CommandExecutor {
         if (action.equalsIgnoreCase("grant")) {
             boolean added = notifyManager.add(uuid);
             if (added) {
-                sender.sendMessage(Component.text("Granted blacklist notify to ", NamedTextColor.GREEN)
+                sender.sendMessage(PREFIX.append(Component.text("Granted blacklist notify to ", NamedTextColor.GREEN)
                         .append(Component.text(playerName, NamedTextColor.AQUA))
-                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY)));
+                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY))));
             } else {
-                sender.sendMessage(Component.text(playerName, NamedTextColor.YELLOW)
-                        .append(Component.text(" already has blacklist notify.", NamedTextColor.GRAY)));
+                sender.sendMessage(PREFIX.append(Component.text(playerName, NamedTextColor.YELLOW)
+                        .append(Component.text(" already has blacklist notify.", NamedTextColor.GRAY))));
             }
             return true;
         } else if (action.equalsIgnoreCase("remove")) {
             boolean removed = notifyManager.remove(uuid);
             if (removed) {
-                sender.sendMessage(Component.text("Removed blacklist notify from ", NamedTextColor.GREEN)
+                sender.sendMessage(PREFIX.append(Component.text("Removed blacklist notify from ", NamedTextColor.GREEN)
                         .append(Component.text(playerName, NamedTextColor.AQUA))
-                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY)));
+                        .append(Component.text(" (" + uuid + ")", NamedTextColor.GRAY))));
             } else {
-                sender.sendMessage(Component.text(playerName, NamedTextColor.RED)
-                        .append(Component.text(" did not have blacklist notify.", NamedTextColor.GRAY)));
+                sender.sendMessage(PREFIX.append(Component.text(playerName, NamedTextColor.RED)
+                        .append(Component.text(" did not have blacklist notify.", NamedTextColor.GRAY))));
             }
             return true;
         } else {
