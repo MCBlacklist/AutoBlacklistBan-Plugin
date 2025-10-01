@@ -1,7 +1,18 @@
 # AutoBlacklistBan
 
-**AutoBlacklistBan** is a Minecraft (Paper) plugin that automatically bans any player who appears in a configured blacklist.  
-Useful for server admins who want to keep certain users off their server without constantly monitoring logins.
+**AutoBlacklistBan** is a Minecraft **Paper plugin** that automatically bans any player who appears in a configured blacklist. Useful for server admins who want to keep certain users off their server without constantly monitoring logins.
+
+--
+
+[**Community Blacklist Website**](https://mcblacklist.com/)
+
+[**Community Blacklist Discord**](https://discord.gg/RjahuQgNXV)
+
+[**Developer Support Discord**](https://discord.gg/hYw2Tdv5BH)
+
+**[Our Github](https://github.com/MCBlacklist/AutoBlacklistBan-Plugin/)**
+
+**[Our Modrinth](https://modrinth.com/organization/mctiers-dev)**
 
 ---
 
@@ -11,14 +22,6 @@ Useful for server admins who want to keep certain users off their server without
 - Compatible with **Paper** (and likely other Bukkit/Spigot forks that support same API).  
 - Easy configuration (add / remove blacklisted names or UUIDs).  
 - Optional messages / logging so admins know who was banned and why.
-
----
-
-## Requirements
-
-- Java 17+ (or whatever Java version you used)  
-- Paper server
-- Permissions to manage bans (server operator or proper permission node if supported)
 
 ---
 
