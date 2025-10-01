@@ -34,11 +34,13 @@ public class BlacklistListener extends BukkitRunnable {
     }
 
     BlacklistManager blacklistManager;
+    private final com.mcblacklist.autoBlacklistBan.Managers.NotifyManager notifyManager;
 
-    public BlacklistListener(JavaPlugin plugin, String apiUrl, BlacklistManager blacklistManager) {
+    public BlacklistListener(JavaPlugin plugin, String apiUrl, BlacklistManager blacklistManager, com.mcblacklist.autoBlacklistBan.Managers.NotifyManager notifyManager) {
         this.plugin = plugin;
         this.apiUrl = apiUrl;
         this.blacklistManager = blacklistManager;
+        this.notifyManager = notifyManager;
     }
 
 
@@ -78,7 +80,7 @@ public class BlacklistListener extends BukkitRunnable {
                                 : String.valueOf(durationEl.getAsInt());
 
 
-                        Bukkit.getLogger().info(ChatColor.BOLD + "" + ChatColor.BLUE + "[Blacklist] New entry: " + ChatColor.RESET + "" + ChatColor.RED + username + " (" + offense + ", " + duration + ")");
+                        Bukkit.getLogger().info("[Blacklist] New entry: " + username + " (" + offense + ", " + duration + ")");
                         BanList banList = Bukkit.getBanList(BanList.Type.NAME);
                         Date expires = null;
                         String durationStr;
@@ -115,6 +117,17 @@ public class BlacklistListener extends BukkitRunnable {
                         if (player != null && player.isOnline()) {
                             final String kickMsg = banMessagefinal;
                             Bukkit.getScheduler().runTask(plugin, () -> player.kickPlayer(kickMsg));
+                        }
+
+                        String offenderName = (username != null) ? UUIDFetcher.getUsername(username) : "Unknown";
+                        String notifyMsg = ChatColor.BLUE + "[Blacklist] " + ChatColor.RESET + ChatColor.YELLOW +
+                                "New entry: " + ChatColor.AQUA + offenderName + ChatColor.GRAY + " (" + username + ") " +
+                                ChatColor.GOLD + "Offense: " + ChatColor.YELLOW + offense + ChatColor.GOLD +
+                                ", Duration: " + ChatColor.YELLOW + durationStr;
+                        for (Player p : Bukkit.getOnlinePlayers()) {
+                            if (notifyManager != null && notifyManager.contains(p.getUniqueId())) {
+                                p.sendMessage(notifyMsg);
+                            }
                         }
                     }
                 }
