@@ -2,7 +2,8 @@
 
 **AutoBlacklistBan** is a Minecraft **Paper plugin** that automatically bans any player who appears in a configured blacklist. Useful for server admins who want to keep certain users off their server without constantly monitoring logins.
 
---
+---
+[**MCTiers Rankings Website**](https://mctiers.com/)
 
 [**Community Blacklist Website**](https://mcblacklist.com/)
 
