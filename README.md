@@ -12,7 +12,7 @@
 
 **[Our Github](https://github.com/MCBlacklist/AutoBlacklistBan-Plugin/)**
 
-**[Our Modrinth](https://modrinth.com/organization/mctiers-dev)**
+**[Our Modrinth](https://modrinth.com/organization/mcblacklist-dev)**
 
 ---
 
